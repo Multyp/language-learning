@@ -24,11 +24,12 @@ export default function JapanesePage() {
     const fetchLessons = async () => {
       try {
         const response = await fetch("/api/lessons");
-        if (!response.ok) throw new Error("Failed to fetch lessons");
+        if (!response.ok)
+          throw new Error("Échec de la récupération des leçons");
         const data = await response.json();
         setLessons(data);
       } catch (err) {
-        setError("Failed to load lessons");
+        setError("Échec du chargement des leçons");
       } finally {
         setLoading(false);
       }
@@ -50,7 +51,7 @@ export default function JapanesePage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
         <div className="flex items-center gap-2">
           <Loader2 className="h-6 w-6 animate-spin" />
-          <span className="text-lg">Loading course content...</span>
+          <span className="text-lg">Chargement du contenu du cours...</span>
         </div>
       </div>
     );
@@ -60,7 +61,7 @@ export default function JapanesePage() {
     return (
       <div className="container mx-auto p-8">
         <Alert variant="destructive">
-          <AlertTitle>Error</AlertTitle>
+          <AlertTitle>Erreur</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       </div>
@@ -79,10 +80,11 @@ export default function JapanesePage() {
             <BookOpen className="h-6 w-6 text-primary" />
           </div>
           <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 text-transparent bg-clip-text">
-            Japanese Course
+            Cours de japonais
           </h1>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Master Japanese through our structured learning path
+            Maîtrisez le japonais grâce à notre parcours d'apprentissage
+            structuré
           </p>
         </motion.div>
 
@@ -100,10 +102,10 @@ export default function JapanesePage() {
                   <div className="bg-primary/10 rounded-lg p-2">
                     <ScrollText className="h-5 w-5 text-primary" />
                   </div>
-                  <h2 className="text-2xl font-bold">Chapter {index + 1}</h2>
+                  <h2 className="text-2xl font-bold">Chapitre {index + 1}</h2>
                   <Badge variant="secondary" className="ml-auto">
                     {chapterLessons.length}{" "}
-                    {chapterLessons.length === 1 ? "lesson" : "lessons"}
+                    {chapterLessons.length === 1 ? "leçon" : "leçons"}
                   </Badge>
                 </div>
 

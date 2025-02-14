@@ -10,39 +10,41 @@ import { BookOpen, ChevronRight, Globe2, Languages } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export default function HomePage() {
-  // This will be expanded as more languages are added
+  // Ceci sera étendu à mesure que d'autres langues seront ajoutées
   const courses = [
     {
       id: "japanese",
-      title: "Japanese",
+      title: "Japonais",
       description:
-        "Master Japanese through structured lessons covering speaking, reading, and writing",
-      status: "Available",
+        "Maîtrisez le japonais grâce à des leçons structurées couvrant la parole, la lecture et l'écriture",
+      status: "Disponible",
       icon: "🇯🇵",
     },
-    // Future languages will be added here
+    // D'autres langues seront ajoutées ici
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted">
       <div className="container mx-auto p-8">
-        {/* Hero Section */}
+        {/* Section Héros */}
         <div className="flex flex-col items-center text-center space-y-6 py-12 mb-12">
           <div className="flex items-center gap-3 mb-4">
             <Languages className="h-12 w-12" />
-            <h1 className="text-5xl font-bold">Language Learning Platform</h1>
+            <h1 className="text-5xl font-bold">
+              Plateforme d'apprentissage des langues
+            </h1>
           </div>
           <p className="text-xl text-muted-foreground max-w-2xl">
-            Embark on your language learning journey with our comprehensive
-            courses. Master new languages through interactive lessons and
-            structured learning paths.
+            Commencez votre parcours d'apprentissage des langues avec nos cours
+            complets. Maîtrisez de nouvelles langues grâce à des leçons
+            interactives et des parcours d'apprentissage structurés.
           </p>
           <Badge variant="secondary" className="text-sm">
-            More languages coming soon
+            Plus de langues à venir
           </Badge>
         </div>
 
-        {/* Courses Grid */}
+        {/* Grille des cours */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {courses.map((course) => (
             <Link key={course.id} href={`/${course.id}`} className="group">
@@ -61,7 +63,7 @@ export default function HomePage() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center text-sm text-muted-foreground group-hover:text-primary transition-colors">
-                    Start Learning
+                    Commencer à apprendre
                     <ChevronRight className="h-4 w-4 ml-1 transition-transform group-hover:translate-x-1" />
                   </div>
                 </CardContent>
@@ -69,19 +71,19 @@ export default function HomePage() {
             </Link>
           ))}
 
-          {/* Coming Soon Cards */}
+          {/* Cartes à venir */}
           {[
             {
-              title: "German",
+              title: "Allemand",
               icon: "🇩🇪",
               description:
-                "Learn German with comprehensive lessons covering grammar, vocabulary, and conversation",
+                "Apprenez l'allemand grâce à des leçons complètes couvrant la grammaire, le vocabulaire et la conversation",
             },
             {
-              title: "Portuguese",
+              title: "Portugais",
               icon: "🇵🇹",
               description:
-                "Master Portuguese through interactive lessons focused on European variants",
+                "Maîtrisez le portugais grâce à des leçons interactives axées sur les variantes européennes",
             },
           ].map((comingSoon) => (
             <Card key={comingSoon.title} className="opacity-50">
@@ -95,32 +97,32 @@ export default function HomePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Badge variant="secondary">Coming Soon</Badge>
+                <Badge variant="secondary">À venir</Badge>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        {/* Features Section */}
+        {/* Section des fonctionnalités */}
         <div className="mt-24 grid md:grid-cols-3 gap-8">
           {[
             {
               icon: <BookOpen className="h-6 w-6" />,
-              title: "Structured Learning",
+              title: "Apprentissage structuré",
               description:
-                "Progress through carefully crafted lessons designed for optimal learning",
+                "Progressez grâce à des leçons soigneusement élaborées pour un apprentissage optimal",
             },
             {
               icon: <Globe2 className="h-6 w-6" />,
-              title: "Cultural Context",
+              title: "Contexte culturel",
               description:
-                "Learn not just the language, but also the cultural nuances and customs",
+                "Apprenez non seulement la langue, mais aussi les nuances culturelles et les coutumes",
             },
             {
               icon: <Languages className="h-6 w-6" />,
-              title: "Multiple Languages",
+              title: "Plusieurs langues",
               description:
-                "Expand your linguistic horizons with our growing collection of language courses",
+                "Élargissez vos horizons linguistiques avec notre collection croissante de cours de langues",
             },
           ].map((feature, index) => (
             <Card key={index} className="bg-muted/50">
