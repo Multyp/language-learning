@@ -7,10 +7,11 @@ export async function GET(
   { params }: { params: { language: string; chapter: string; slug: string } }
 ) {
   try {
+    const { language, chapter, slug } = await params;
     const { content, frontmatter } = await getLessonContent(
-      params.language,
-      params.chapter,
-      params.slug
+      language,
+      chapter,
+      slug
     );
 
     // Serialize the MDX content on the server side

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { MDXRemote } from "next-mdx-remote";
+import { BookOpen } from "lucide-react";
 import { components } from "@/app/components/mdx";
 
 interface LessonContent {
@@ -12,6 +13,7 @@ interface LessonContent {
   };
 }
 
+// Main Lesson Page Component
 export default function LessonPage({
   params,
 }: {
@@ -34,7 +36,6 @@ export default function LessonPage({
 
   useEffect(() => {
     if (!chapter || !slug) return;
-
     const fetchLesson = async () => {
       try {
         const response = await fetch(
@@ -50,17 +51,32 @@ export default function LessonPage({
         setLoading(false);
       }
     };
-
     fetchLesson();
   }, [chapter, slug]);
 
-  if (loading) return <div>Loading lesson...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (!content) return <div>No content available</div>;
-  if (content == "") return <div>Empty content</div>;
+  if (loading)
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="flex items-center justify-center min-h-screen text-red-500">
+        <span className="mr-2">⚠️</span> {error}
+      </div>
+    );
+
+  if (!content)
+    return (
+      <div className="flex items-center justify-center min-h-screen text-gray-500">
+        <BookOpen className="mr-2" /> No content available
+      </div>
+    );
 
   return (
-    <div className="container mx-auto p-8">
+    <div className="container mx-auto p-4 md:p-8 max-w-4xl">
       <article className="prose lg:prose-xl">
         <MDXRemote {...content} components={components} />
       </article>
