@@ -91,6 +91,7 @@ export default function ChapterPage({
   }
 
   if (!resolvedParams) return null;
+  console.log(resolvedParams);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">

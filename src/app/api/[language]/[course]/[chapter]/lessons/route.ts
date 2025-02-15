@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { readFile, readdir, stat } from "fs/promises";
 import path from "path";
+import matter from "gray-matter";
 
 export async function GET(
   req: Request,
@@ -34,13 +35,13 @@ export async function GET(
         const lessonStat = await stat(lessonPath);
         if (lessonStat.isFile() && entry.endsWith(".mdx")) {
           const lessonContent = await readFile(lessonPath, "utf-8");
-
-          const orderMatch = lessonContent.match(/order:\s*(\d+)/);
-          const order = orderMatch ? parseInt(orderMatch[1], 10) : 0;
+          const { data: frontmatter } = matter(lessonContent);
 
           lessons.push({
             id: entry.replace(".mdx", ""),
-            order: order,
+            title: frontmatter.title || `Lesson ${entry.replace(".mdx", "")}`,
+            description: frontmatter.description || "",
+            order: frontmatter.order || 0,
           });
         }
       } catch (fsError) {
