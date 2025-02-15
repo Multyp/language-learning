@@ -29,7 +29,7 @@ export default function CoursesPage({
         const resolvedParams = await params;
         setLanguage(resolvedParams.language);
       } catch (err) {
-        setError("Failed to load page parameters");
+        setError("Le chargement des paramètres de la page a échoué");
         setLoading(false);
       }
     };
@@ -60,7 +60,7 @@ export default function CoursesPage({
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
         <div className="flex items-center gap-2">
           <Loader2 className="h-6 w-6 animate-spin" />
-          <span className="text-lg">Loading courses...</span>
+          <span className="text-lg">En cours de chargement...</span>
         </div>
       </div>
     );
@@ -89,10 +89,10 @@ export default function CoursesPage({
             <BookOpen className="h-6 w-6 text-primary" />
           </div>
           <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 text-transparent bg-clip-text">
-            Japanese Courses
+            Cours de japonais
           </h1>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Master Japanese with our structured learning paths
+            Apprenez le japonais à votre rythme avec nos cours en ligne.{" "}
           </p>
         </motion.div>
 
@@ -111,7 +111,7 @@ export default function CoursesPage({
                     {course.description}
                   </p>
                   <div className="flex items-center text-primary">
-                    <span>Start learning</span>
+                    <span>Découvrez ce cours</span>
                     <ChevronRight className="h-5 w-5 ml-2" />
                   </div>
                 </div>

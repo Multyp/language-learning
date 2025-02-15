@@ -59,7 +59,7 @@ export default function ChapterPage({
         setLessons(data.lessons);
         setChapterInfo(data.chapterInfo);
       } catch (err) {
-        setError("Failed to load lessons");
+        setError("Le chargement des leçons a échoué");
       } finally {
         setLoading(false);
       }
@@ -73,7 +73,7 @@ export default function ChapterPage({
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
         <div className="flex items-center gap-2">
           <Loader2 className="h-6 w-6 animate-spin" />
-          <span className="text-lg">Loading lessons...</span>
+          <span className="text-lg">En cours de chargement...</span>
         </div>
       </div>
     );
@@ -101,7 +101,7 @@ export default function ChapterPage({
           className="inline-flex items-center text-primary hover:text-primary/80 mb-8"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Chapters
+          Retour aux chapitres
         </Link>
 
         <motion.div
@@ -137,7 +137,7 @@ export default function ChapterPage({
                     {lesson.description}
                   </p>
                   <div className="flex items-center text-primary">
-                    <span>Start lesson</span>
+                    <span>Commencez la leçon</span>
                     <ChevronRight className="h-5 w-5 ml-2" />
                   </div>
                 </div>

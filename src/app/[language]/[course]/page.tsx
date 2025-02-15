@@ -46,7 +46,7 @@ export default function ChaptersPage({
         const resolved = await params;
         setResolvedParams(resolved);
       } catch (err) {
-        setError("Failed to load page parameters");
+        setError("Le chargement des paramètres de la page a échoué");
         setLoading(false);
       }
     };
@@ -81,7 +81,7 @@ export default function ChaptersPage({
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
         <div className="flex items-center gap-2">
           <Loader2 className="h-6 w-6 animate-spin" />
-          <span className="text-lg">Loading chapters...</span>
+          <span className="text-lg">En cours de chargement...</span>
         </div>
       </div>
     );
@@ -109,7 +109,7 @@ export default function ChaptersPage({
           className="inline-flex items-center text-primary hover:text-primary/80 mb-8"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Courses
+          Retour aux cours
         </Link>
 
         <motion.div

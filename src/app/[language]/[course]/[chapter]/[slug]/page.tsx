@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { MDXRemote } from "next-mdx-remote";
 import { BookOpen, ArrowLeft, ArrowRight } from "lucide-react";
-import { components } from "@/app/components/mdx";
+import { components } from "@/components/mdx";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -82,7 +82,7 @@ export default function LessonPage({
           setNavigation(navData);
         }
       } catch (err) {
-        setError("Failed to load lesson");
+        setError("Le chargement de la leçon a échoué");
       } finally {
         setLoading(false);
       }
@@ -118,7 +118,7 @@ export default function LessonPage({
         {/* Breadcrumb navigation */}
         <nav className="mb-8 flex items-center space-x-2 text-sm text-muted-foreground">
           <Link href={`/${params.language}`} className="hover:text-primary">
-            Courses
+            Cours
           </Link>
           <span>/</span>
           <Link
