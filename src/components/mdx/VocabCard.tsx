@@ -1,46 +1,34 @@
-import { useState } from "react";
-import { Info } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
 const VocabCard = ({
-  word,
-  reading,
-  meaning,
-}: {
-  word: string;
-  reading: string;
-  meaning: string;
+  word = "例",
+  reading = "れい",
+  meaning = "Example",
+  type = "noun",
+  exampleSentence = "これは例です。",
+  exampleMeaning = "This is an example.",
 }) => {
-  const [isFlipped, setIsFlipped] = useState(false);
-
   return (
-    <Card className="group perspective-1000 my-4 hover:shadow-lg transition-all duration-300">
-      <div
-        className={`relative transform-style-3d transition-transform duration-500 cursor-pointer ${
-          isFlipped ? "rotate-y-180" : ""
-        }`}
-        onClick={() => setIsFlipped(!isFlipped)}
-      >
-        {!isFlipped ? (
-          <div className="backface-hidden">
-            <CardContent className="p-6">
-              <div className="text-center space-y-2">
-                <div className="text-3xl font-bold text-gray-900">{word}</div>
-                <div className="text-lg text-gray-600">{reading}</div>
-              </div>
-            </CardContent>
+    <div className="w-full mx-auto bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+      <div className="p-6 space-y-4">
+        <div className="flex items-start justify-between">
+          <div>
+            <h2 className="text-4xl font-bold text-gray-900">{word}</h2>
+            <p className="text-lg text-gray-600 mt-1">{reading}</p>
           </div>
-        ) : (
-          <div className="absolute inset-0 backface-hidden rotate-y-180">
-            <CardContent className="p-6">
-              <div className="text-center">
-                <div className="text-2xl text-gray-900">{meaning}</div>
-              </div>
-            </CardContent>
-          </div>
-        )}
+          <span className="px-3 py-1 text-sm font-medium text-gray-600 bg-gray-100 rounded-full">
+            {type}
+          </span>
+        </div>
+
+        <div className="pt-2 border-t border-gray-100">
+          <p className="text-xl text-gray-800">{meaning}</p>
+        </div>
+
+        <div className="space-y-2 pt-4 border-t border-gray-100">
+          <p className="text-gray-800">{exampleSentence}</p>
+          <p className="text-gray-600 text-sm italic">{exampleMeaning}</p>
+        </div>
       </div>
-    </Card>
+    </div>
   );
 };
 
