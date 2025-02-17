@@ -3,6 +3,8 @@ import { Pause, Play, SkipBack, SkipForward, Volume2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 interface AudioQuizProps {
   question: string;
@@ -108,11 +110,26 @@ const AudioQuiz = ({
   }, []);
 
   return (
-    <Card className="my-6">
-      <CardHeader>
-        <CardTitle className="text-xl font-bold">{question}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
+    <Card className="my-4 w-full mx-auto border-2 border-gray-200 hover:border-gray-300 transition-all duration-300 group">
+      <CardContent className="p-6 space-y-4">
+        <div className="flex items-start justify-between">
+          <div className="space-y-1">
+            <CardTitle className="text-2xl font-bold text-gray-900 group-hover:text-gray-700 transition-colors duration-300">
+              {question}
+            </CardTitle>
+            {sequence && (
+              <Badge
+                variant="secondary"
+                className="text-sm font-medium capitalize"
+              >
+                {sequence}
+              </Badge>
+            )}
+          </div>
+        </div>
+
+        <Separator className="my-4" />
+
         <div className="space-y-4 p-4 bg-slate-50 rounded-lg">
           <div className="flex items-center justify-center">
             <div className="flex items-center gap-4">
@@ -145,11 +162,6 @@ const AudioQuiz = ({
                 <SkipForward className="h-4 w-4" />
               </Button>
             </div>
-            {sequence && (
-              <div className="text-lg font-medium text-slate-700">
-                {sequence}
-              </div>
-            )}
           </div>
 
           <div className="flex flex-col space-y-2 gap-2">
@@ -182,14 +194,16 @@ const AudioQuiz = ({
           </div>
         </div>
 
+        <Separator className="my-4" />
+
         <div className="grid grid-cols-2 gap-4 !mt-4">
           {options.map((option) => (
             <Button
               key={option}
               variant="outline"
-              className={`p-6 text-xl h-auto ${
+              className={`p-4 text-lg h-auto ${
                 selected === option &&
-                "border-blue-500 bg-blue-50 hover:bg-blue-100"
+                "border-blue-500 bg-blue-50 hover:bg-blue-100 hover:text-black"
               }`}
               onClick={() => setSelected(option)}
             >
@@ -208,7 +222,7 @@ const AudioQuiz = ({
 
         {showResult && (
           <div
-            className={`p-4 rounded-lg ${
+            className={`p-4 rounded-lg mt-4 ${
               selected === answer ? "bg-green-100" : "bg-red-100"
             }`}
           >

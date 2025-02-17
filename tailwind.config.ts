@@ -33,7 +33,7 @@ export default {
           foreground: "#495057", // Darker gray for better contrast
         },
         accent: {
-          DEFAULT: "#fd7e14", // Orange accent color
+          DEFAULT: "#6a6dec",
           foreground: "#ffffff", // White text for better contrast
         },
         destructive: {
@@ -61,9 +61,5 @@ export default {
       },
     },
   },
-  plugins: [
-    require("tailwindcss-animate"),
-    require("@tailwindcss/forms"),
-    require("@tailwindcss/typography"),
-  ],
+  plugins: [require("tailwindcss-animate")],
 } satisfies Config;
