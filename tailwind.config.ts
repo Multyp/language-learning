@@ -10,50 +10,49 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: "#ffffff",
-        foreground: "#111111",
+        background: "#f8f9fa", // Light background for better readability
+        foreground: "#212529", // Darker text for better contrast
         card: {
-          DEFAULT: "#f8f9fa",
-          foreground: "#333333",
+          DEFAULT: "#ffffff", // White background for cards
+          foreground: "#212529", // Dark text for better contrast
         },
         popover: {
-          DEFAULT: "#f1f5f9",
-          foreground: "#1f2937",
+          DEFAULT: "#f8f9fa", // Light background for popovers
+          foreground: "#212529", // Dark text for better contrast
         },
         primary: {
-          DEFAULT: "#1e40af",
-          foreground: "#ffffff",
+          DEFAULT: "#007bff", // Blue primary color
+          foreground: "#ffffff", // White text for better contrast
         },
         secondary: {
-          DEFAULT: "#ffed4a",
-          foreground: "#1a202c",
+          DEFAULT: "#6c757d", // Gray secondary color
+          foreground: "#ffffff", // White text for better contrast
         },
         muted: {
-          DEFAULT: "#e9ecef",
-          foreground: "#495057",
+          DEFAULT: "#adb5bd", // Light gray for muted text
+          foreground: "#495057", // Darker gray for better contrast
         },
         accent: {
-          DEFAULT: "#e83e8c",
-          foreground: "#ffffff",
+          DEFAULT: "#fd7e14", // Orange accent color
+          foreground: "#ffffff", // White text for better contrast
         },
         destructive: {
-          DEFAULT: "#e3342f",
-          foreground: "#ffffff",
+          DEFAULT: "#dc3545", // Red for destructive actions
+          foreground: "#ffffff", // White text for better contrast
         },
-        border: "#dee2e6",
-        input: "#ced4da",
-        ring: "#d1d5db",
+        border: "#dee2e6", // Light gray for borders
+        input: "#ced4da", // Light gray for input fields
+        ring: "#80bdff", // Light blue for focus rings
         chart: {
-          "1": "#1d4ed8",
-          "2": "#9333ea",
-          "3": "#dc2626",
-          "4": "#059669",
-          "5": "#f59e0b",
+          "1": "#1d4ed8", // Blue
+          "2": "#9333ea", // Purple
+          "3": "#dc2626", // Red
+          "4": "#059669", // Green
+          "5": "#f59e0b", // Yellow
         },
-
-        success: "#28a745",
-        warning: "#ffc107",
-        info: "#17a2b8",
+        success: "#28a745", // Green for success messages
+        warning: "#ffc107", // Yellow for warning messages
+        info: "#17a2b8", // Blue for informational messages
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -62,5 +61,9 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    require("@tailwindcss/forms"),
+    require("@tailwindcss/typography"),
+  ],
 } satisfies Config;
