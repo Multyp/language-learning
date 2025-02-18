@@ -3,19 +3,13 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import {
-  BookOpen,
-  ChevronRight,
-  Loader2,
-  GraduationCap,
-  ArrowLeft,
-} from "lucide-react";
+import { BookOpen, ChevronRight, GraduationCap, ArrowLeft } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import HiraganaGame from "@/components/games/HiraganaGame";
 
 interface Course {
   title: string;
@@ -130,7 +124,7 @@ export default function CoursesPage({
           <div className="inline-flex items-center justify-center p-3 mb-4 bg-primary/10 rounded-full border-2 border-primary/20">
             <GraduationCap className="h-8 w-8 text-primary" />
           </div>
-          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 text-transparent bg-clip-text">
+          <h1 className="text-4xl font-bold mb-4 bg-primary text-transparent bg-clip-text">
             Cours de japonais
           </h1>
           <p className="text-muted-foreground max-w-xl mx-auto text-lg">
@@ -187,6 +181,7 @@ export default function CoursesPage({
             </motion.div>
           ))}
         </div>
+        {language === "japanese" && <HiraganaGame />}
       </div>
     </div>
   );
