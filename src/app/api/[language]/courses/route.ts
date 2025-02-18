@@ -4,10 +4,11 @@ import path from "path";
 
 export async function GET(
   req: Request,
-  { params }: { params: { language: string } }
+  { params }: { params: Promise<{ language: string }> }
 ) {
   try {
-    const contentDir = path.join(process.cwd(), "content", params.language);
+    const { language } = await params;
+    const contentDir = path.join(process.cwd(), "content", language);
     const courses = await readdir(contentDir);
     const coursesInfo = [];
 
