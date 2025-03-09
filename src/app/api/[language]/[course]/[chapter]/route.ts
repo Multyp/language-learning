@@ -55,4 +55,27 @@ export async function GET(
   }
 }
 
+export async function generateStaticParams() {
+  const contentPath = path.join(process.cwd(), "content");
+  const languages = await readdir(contentPath);
+
+  const paths = [];
+
+  for (const language of languages) {
+    const coursesPath = path.join(contentPath, language);
+    const courses = await readdir(coursesPath);
+
+    for (const course of courses) {
+      const chaptersPath = path.join(coursesPath, course);
+      const chapters = await readdir(chaptersPath);
+
+      for (const chapter of chapters) {
+        paths.push({ language, course, chapter });
+      }
+    }
+  }
+
+  return paths;
+}
+
 export const dynamic = "force-static";

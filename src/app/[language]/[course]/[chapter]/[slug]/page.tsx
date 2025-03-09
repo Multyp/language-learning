@@ -1,11 +1,6 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
-import { BookOpen, ArrowLeft, ArrowRight } from "lucide-react";
-import { components } from "@/components/mdx";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Suspense } from "react";
+import { LessonClient } from "./client";
+import { MDXRemoteSerializeResult } from "next-mdx-remote";
 
 interface LessonContent {
   content: MDXRemoteSerializeResult<unknown, unknown>;
@@ -39,137 +34,106 @@ interface Navigation {
   } | null;
 }
 
-export default function LessonPage({
-  params: paramsPromise,
-}: {
-  params: Promise<{
-    language: string;
-    course: string;
-    chapter: string;
-    slug: string;
-  }>;
-}) {
-  const [params, setParams] = useState<{
-    language: string;
-    course: string;
-    chapter: string;
-    slug: string;
-  } | null>(null);
-  const [content, setContent] = useState<LessonContent | null>(null);
-  const [navigation, setNavigation] = useState<Navigation | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+interface PageParams {
+  language: string;
+  course: string;
+  chapter: string;
+  slug: string;
+}
 
-  useEffect(() => {
-    const resolveParamsAndFetch = async () => {
-      try {
-        const resolvedParams = await paramsPromise;
-        setParams(resolvedParams);
-
-        const response = await fetch(
-          `/api/${resolvedParams.language}/${resolvedParams.course}/${resolvedParams.chapter}/${resolvedParams.slug}`
-        );
-        if (!response.ok) throw new Error("Failed to fetch lesson");
-        const data: LessonContent = await response.json();
-        setContent(data);
-
-        // Fetch navigation info
-        const navResponse = await fetch(
-          `/api/${resolvedParams.language}/${resolvedParams.course}/${resolvedParams.chapter}/${resolvedParams.slug}/navigation`
-        );
-        if (navResponse.ok) {
-          const navData: Navigation = await navResponse.json();
-          setNavigation(navData);
-        }
-      } catch {
-        setError("Le chargement de la leçon a échoué");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    resolveParamsAndFetch();
-  }, [paramsPromise]);
-
-  if (loading)
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
+async function fetchLessonData(params: PageParams) {
+  try {
+    const response = await fetch(
+      `/api/${params.language}/${params.course}/${params.chapter}/${params.slug}`
     );
 
-  if (error)
-    return (
-      <div className="flex items-center justify-center min-h-screen text-destructive">
-        <span className="mr-2">⚠️</span> {error}
-      </div>
+    if (!response.ok) throw new Error("Failed to fetch lesson");
+    return (await response.json()) as LessonContent;
+  } catch {
+    throw new Error("Le chargement de la leçon a échoué");
+  }
+}
+
+async function fetchNavigationData(params: PageParams) {
+  try {
+    const response = await fetch(
+      `/api/${params.language}/${params.course}/${params.chapter}/${params.slug}/navigation`
     );
 
-  if (!content || !params)
-    return (
-      <div className="flex items-center justify-center min-h-screen text-muted-foreground">
-        <BookOpen className="mr-2" /> No content available
-      </div>
-    );
+    if (!response.ok) return null;
+    return (await response.json()) as Navigation;
+  } catch {
+    return null;
+  }
+}
 
+interface PageProps {
+  params: Promise<PageParams>;
+}
+
+export default async function LessonPage({ params }: PageProps) {
+  const resolvedParams = await params;
+
+  try {
+    const [content, navigation] = await Promise.all([
+      fetchLessonData(resolvedParams),
+      fetchNavigationData(resolvedParams),
+    ]);
+
+    return (
+      <Suspense fallback={<LessonLoadingSkeleton />}>
+        <LessonClient
+          params={resolvedParams}
+          content={content}
+          navigation={navigation}
+        />
+      </Suspense>
+    );
+  } catch {
+    return (
+      <LessonClient
+        params={resolvedParams}
+        error="Le chargement de la leçon a échoué"
+      />
+    );
+  }
+}
+
+function LessonLoadingSkeleton() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      <div className="container mx-auto p-4 md:p-8 max-w-4xl">
-        {/* Breadcrumb navigation */}
-        <nav className="mb-8 flex items-center space-x-2 text-sm text-muted-foreground">
-          <Link href={`/${params.language}`} className="hover:text-primary">
-            Cours
-          </Link>
-          <span>/</span>
-          <Link
-            href={`/${params.language}/${params.course}`}
-            className="hover:text-primary"
-          >
-            {content.courseInfo.title}
-          </Link>
-          <span>/</span>
-          <Link
-            href={`/${params.language}/${params.course}/${params.chapter}`}
-            className="hover:text-primary"
-          >
-            {content.chapterInfo.title}
-          </Link>
-        </nav>
-
-        {/* Main content */}
-        <article className="prose lg:prose-xl dark:prose-invert mx-auto bg-card rounded-xl p-8 shadow-lg">
-          <MDXRemote {...content.content} components={components} />
-        </article>
-
-        {/* Navigation buttons */}
-        <div className="mt-8 flex justify-between items-center">
-          {navigation?.previous ? (
-            <Link
-              href={`/${params.language}/${navigation.previous.course}/${navigation.previous.chapter}/${navigation.previous.slug}`}
-            >
-              <Button variant="outline" className="flex items-center">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Previous Lesson
-              </Button>
-            </Link>
-          ) : (
-            <div />
-          )}
-
-          {navigation?.next && (
-            <Link
-              href={`/${params.language}/${navigation.next.course}/${navigation.next.chapter}/${navigation.next.slug}`}
-            >
-              <Button className="flex items-center">
-                Next Lesson
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-          )}
-        </div>
-      </div>
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
     </div>
   );
+}
+
+export async function generateStaticParams() {
+  return [
+    {
+      language: "japanese",
+      course: "course-1",
+      chapter: "chapter-1",
+      slug: "lesson-1",
+    },
+    {
+      language: "japanese",
+      course: "course-2",
+      chapter: "chapter-1",
+      slug: "lesson-1",
+    },
+    {
+      language: "japanese",
+      course: "course-2",
+      chapter: "chapter-1",
+      slug: "lesson-2",
+    },
+    {
+      language: "japanese",
+      course: "course-2",
+      chapter: "chapter-2",
+      slug: "lesson-1",
+    },
+  ];
 }
 
 export const dynamic = "force-static";

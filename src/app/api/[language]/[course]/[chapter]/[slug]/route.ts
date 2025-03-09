@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { readFile } from "fs/promises";
+import { readFile, readdir, stat } from "fs/promises";
 import path from "path";
 import matter from "gray-matter";
 import { serialize } from "next-mdx-remote/serialize";
@@ -68,6 +68,52 @@ export async function GET(
   } catch {
     return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
   }
+}
+
+export async function generateStaticParams() {
+  const contentPath = path.join(process.cwd(), "content");
+  const languages = await readdir(contentPath);
+
+  const paths = [];
+
+  for (const language of languages) {
+    const languagePath = path.join(contentPath, language);
+    // Only process if languagePath is a directory
+    if (!(await stat(languagePath)).isDirectory()) continue;
+
+    const courses = await readdir(languagePath);
+
+    for (const course of courses) {
+      const coursePath = path.join(languagePath, course);
+      // Ensure coursePath is a directory (skips descriptor.json or other files)
+      if (!(await stat(coursePath)).isDirectory()) continue;
+
+      const chapters = await readdir(coursePath);
+
+      for (const chapter of chapters) {
+        const chapterPath = path.join(coursePath, chapter);
+        // Only process chapters that are directories
+        if (!(await stat(chapterPath)).isDirectory()) continue;
+
+        const lessons = await readdir(chapterPath);
+
+        for (const lesson of lessons) {
+          const lessonPath = path.join(chapterPath, lesson);
+          // Process only .mdx files and ensure it's a file
+          if (lesson.endsWith(".mdx") && (await stat(lessonPath)).isFile()) {
+            paths.push({
+              language,
+              course,
+              chapter,
+              slug: lesson.replace(".mdx", ""),
+            });
+          }
+        }
+      }
+    }
+  }
+
+  return paths;
 }
 
 export const dynamic = "force-static";

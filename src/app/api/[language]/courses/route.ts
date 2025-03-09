@@ -37,4 +37,11 @@ export async function GET(
   }
 }
 
+export async function generateStaticParams() {
+  const contentPath = path.join(process.cwd(), "content");
+  const languages = await readdir(contentPath);
+
+  return languages.map((language) => ({ language }));
+}
+
 export const dynamic = "force-static";

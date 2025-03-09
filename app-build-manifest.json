@@ -1,0 +1,19 @@
+{
+  "pages": {
+    "/": ["static/chunks/pages/index.js"],
+    "/about": ["static/chunks/pages/about.js"],
+    "/contact": ["static/chunks/pages/contact.js"]
+  },
+  "ampPages": [],
+  "lowPriorityFiles": [],
+  "rootMainFiles": ["static/chunks/main.js"],
+  "polyfillFiles": ["static/chunks/polyfills.js"],
+  "devFiles": [],
+  "ampDevFiles": [],
+  "pagesManifest": "server/pages-manifest.json",
+  "buildId": "development",
+  "reactLoadableManifest": {},
+  "rewrites": [],
+  "headers": [],
+  "redirects": []
+}
