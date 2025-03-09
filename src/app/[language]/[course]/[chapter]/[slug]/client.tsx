@@ -5,6 +5,7 @@ import { BookOpen, ArrowLeft, ArrowRight } from "lucide-react";
 import { components } from "@/components/mdx";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
 
 interface PageParams {
   language: string;
@@ -14,7 +15,7 @@ interface PageParams {
 }
 
 interface LessonContent {
-  content: MDXRemoteSerializeResult<unknown, unknown>;
+  serializedContent: string;
   frontmatter: {
     title: string;
     description: string;
@@ -58,6 +59,22 @@ export function LessonClient({
   navigation,
   error = "",
 }: LessonClientProps) {
+  // State to hold the parsed MDX content
+  const [mdxContent, setMdxContent] =
+    useState<MDXRemoteSerializeResult<unknown, unknown>>();
+
+  // Parse the serialized content when the component mounts or content changes
+  useEffect(() => {
+    if (content?.serializedContent) {
+      try {
+        const parsedContent = JSON.parse(content.serializedContent);
+        setMdxContent(parsedContent);
+      } catch (e) {
+        console.error("Error parsing MDX content:", e);
+      }
+    }
+  }, [content]);
+
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen text-destructive">
@@ -97,12 +114,17 @@ export function LessonClient({
             {content.chapterInfo.title}
           </Link>
         </nav>
-
         {/* Main content */}
         <article className="prose lg:prose-xl dark:prose-invert mx-auto bg-card rounded-xl p-8 shadow-lg">
-          <MDXRemote {...content.content} components={components} />
+          <h1>{content.frontmatter.title}</h1>
+          {mdxContent ? (
+            <MDXRemote {...mdxContent} components={components} />
+          ) : (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+            </div>
+          )}
         </article>
-
         {/* Navigation buttons */}
         <div className="mt-8 flex justify-between items-center">
           {navigation?.previous ? (
@@ -117,7 +139,6 @@ export function LessonClient({
           ) : (
             <div />
           )}
-
           {navigation?.next && (
             <Link
               href={`/${params.language}/${navigation.next.course}/${navigation.next.chapter}/${navigation.next.slug}`}

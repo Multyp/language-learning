@@ -9,7 +9,6 @@ interface Course {
   imageUrl?: string;
 }
 
-// This function gets courses for the server component
 function getCoursesData(language: string): Course[] {
   try {
     const contentDir = path.join(
@@ -49,10 +48,17 @@ function getCoursesData(language: string): Course[] {
   }
 }
 
-export default function Page({ params }: { params: { language: string } }) {
-  const courses = getCoursesData(params.language);
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ language: string }>;
+}) {
+  const resolvedParams = await params;
+  const courses = getCoursesData(resolvedParams.language);
 
-  return <CoursesPageClient courses={courses} language={params.language} />;
+  return (
+    <CoursesPageClient courses={courses} language={resolvedParams.language} />
+  );
 }
 
 export async function generateStaticParams() {

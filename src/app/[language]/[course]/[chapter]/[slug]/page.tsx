@@ -1,12 +1,11 @@
 import { Suspense } from "react";
 import { LessonClient } from "./client";
-import { MDXRemoteSerializeResult } from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
 import fs from "fs/promises";
 import path from "path";
-import { serialize } from "next-mdx-remote/serialize";
 
 interface LessonContent {
-  content: MDXRemoteSerializeResult<unknown, unknown>;
+  serializedContent: string; // Serialized content as string to pass to client
   frontmatter: {
     title: string;
     description: string;
@@ -45,7 +44,7 @@ interface PageParams {
 }
 
 interface PageProps {
-  params: PageParams;
+  params: Promise<PageParams>;
 }
 
 // Server-side function to load lesson content
@@ -77,8 +76,6 @@ async function getLessonData(params: PageParams): Promise<LessonContent> {
     const chapterInfo = JSON.parse(chapterDescriptorRaw);
 
     // Extract frontmatter and serialize MDX content
-    // In a real app, you might want to parse frontmatter from the MDX file
-    // For this example, we'll use a simplified approach
     const frontmatter = {
       title: params.slug
         .replace(/-/g, " ")
@@ -87,10 +84,13 @@ async function getLessonData(params: PageParams): Promise<LessonContent> {
       order: parseInt(params.slug.replace("lesson-", "")),
     };
 
-    const content = await serialize(mdxContent);
+    // Serialize the MDX content
+    const mdxResult = await serialize(mdxContent);
+    // Convert the serialized content to a string to pass to the client
+    const serializedContent = JSON.stringify(mdxResult);
 
     return {
-      content,
+      serializedContent,
       frontmatter,
       courseInfo,
       chapterInfo,
@@ -222,16 +222,17 @@ async function getNavigationData(params: PageParams): Promise<Navigation> {
 }
 
 export default async function LessonPage({ params }: PageProps) {
+  const resolvedParams = await params;
   try {
     const [content, navigation] = await Promise.all([
-      getLessonData(params),
-      getNavigationData(params),
+      getLessonData(resolvedParams),
+      getNavigationData(resolvedParams),
     ]);
 
     return (
       <Suspense fallback={<LessonLoadingSkeleton />}>
         <LessonClient
-          params={params}
+          params={resolvedParams}
           content={content}
           navigation={navigation}
         />
@@ -240,7 +241,7 @@ export default async function LessonPage({ params }: PageProps) {
   } catch {
     return (
       <LessonClient
-        params={params}
+        params={resolvedParams}
         error="Le chargement de la leçon a échoué"
       />
     );

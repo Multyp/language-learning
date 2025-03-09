@@ -84,17 +84,18 @@ function getChaptersData(params: PageParams): {
 }
 
 interface PageProps {
-  params: PageParams;
+  params: Promise<PageParams>;
 }
 
-export default function ChaptersPage({ params }: PageProps) {
+export default async function ChaptersPage({ params }: PageProps) {
+  const resolvedParams = await params;
   try {
-    const data = getChaptersData(params);
+    const data = getChaptersData(resolvedParams);
 
     return (
       <Suspense fallback={<ChaptersLoadingSkeleton />}>
         <ChaptersClient
-          params={params}
+          params={resolvedParams}
           chapters={data.chapters}
           courseInfo={data.courseInfo}
         />
@@ -103,7 +104,7 @@ export default function ChaptersPage({ params }: PageProps) {
   } catch {
     return (
       <ChaptersClient
-        params={params}
+        params={resolvedParams}
         error="Impossible de charger les chapitres"
       />
     );

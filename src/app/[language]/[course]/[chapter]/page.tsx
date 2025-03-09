@@ -10,7 +10,7 @@ interface PageParams {
 }
 
 interface PageProps {
-  params: PageParams;
+  params: Promise<PageParams>;
 }
 
 interface Chapter {
@@ -85,13 +85,14 @@ async function getChaptersData(params: PageParams): Promise<{
 }
 
 export default async function ChaptersPage({ params }: PageProps) {
+  const resolvedParams = await params;
   try {
-    const data = await getChaptersData(params);
+    const data = await getChaptersData(resolvedParams);
 
     return (
       <Suspense fallback={<ChaptersLoadingSkeleton />}>
         <ChaptersClient
-          params={params}
+          params={resolvedParams}
           chapters={data.chapters}
           courseInfo={data.courseInfo}
         />
@@ -100,7 +101,7 @@ export default async function ChaptersPage({ params }: PageProps) {
   } catch {
     return (
       <ChaptersClient
-        params={params}
+        params={resolvedParams}
         error="Impossible de charger les chapitres"
       />
     );
@@ -137,7 +138,8 @@ function ChaptersLoadingSkeleton() {
 
 export async function generateStaticParams() {
   return [
-    { language: "japanese", course: "course-1" },
-    { language: "japanese", course: "course-2" },
+    { language: "japanese", course: "course-1", chapter: "chapter-1" },
+    { language: "japanese", course: "course-2", chapter: "chapter-1" },
+    { language: "japanese", course: "course-2", chapter: "chapter-2" },
   ];
 }
