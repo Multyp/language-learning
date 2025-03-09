@@ -1,6 +1,6 @@
 import CharacterStudy from "./CharacterStudy";
 import FillInBlanks from "./FillInBlanks";
-import AudioQuiz from "./AudioQuiz";
+import AudioQuiz from "./language-learning/audioQuiz";
 import TrueFalse from "./TrueFalse";
 import WritingTips from "./WritingTips";
 import CharacterTable from "./CharacterTable";
