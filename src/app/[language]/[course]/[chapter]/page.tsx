@@ -1,12 +1,15 @@
 import { Suspense } from "react";
-import { ChaptersClient } from "./client";
+import { LessonClient } from "./client";
 import { Skeleton } from "@/components/ui/skeleton";
 import fs from "fs/promises";
 import path from "path";
+import matter from "gray-matter"; // Make sure to install this package
 
 interface PageParams {
   language: string;
   course: string;
+  chapter: string;
+  slug: string;
 }
 
 interface PageProps {
@@ -24,6 +27,13 @@ interface Chapter {
 interface CourseInfo {
   title: string;
   description: string;
+}
+
+interface Lesson {
+  slug: string;
+  title: string;
+  description: string;
+  order: number;
 }
 
 async function getChaptersData(params: PageParams): Promise<{
@@ -84,23 +94,66 @@ async function getChaptersData(params: PageParams): Promise<{
   }
 }
 
+async function getLessonsForChapter(params: PageParams): Promise<Lesson[]> {
+  try {
+    const chapterPath = path.join(
+      process.cwd(),
+      "src/app/content",
+      params.language,
+      params.course,
+      params.chapter
+    );
+
+    const files = await fs.readdir(chapterPath);
+    const lessonFiles = files.filter((file) => file.endsWith(".mdx"));
+
+    const lessons = await Promise.all(
+      lessonFiles.map(async (file) => {
+        const filePath = path.join(chapterPath, file);
+        const fileContent = await fs.readFile(filePath, "utf-8");
+
+        // Use gray-matter to parse frontmatter properly
+        const { data } = matter(fileContent);
+
+        return {
+          slug: file.replace(".mdx", ""),
+          title: data.title || "Untitled Lesson",
+          description: data.description || "No description",
+          order: data.order || 0,
+        };
+      })
+    );
+
+    return lessons.sort((a, b) => a.order - b.order);
+  } catch (error) {
+    console.error("Error reading lesson data:", error);
+    return [];
+  }
+}
+
 export default async function ChaptersPage({ params }: PageProps) {
   const resolvedParams = await params;
   try {
-    const data = await getChaptersData(resolvedParams);
+    const chapterData = await getChaptersData(resolvedParams);
+    const lessonList = await getLessonsForChapter(resolvedParams);
+
+    if (lessonList.length === 0) {
+      console.warn(`No lessons found for chapter: ${resolvedParams.chapter}`);
+    }
 
     return (
       <Suspense fallback={<ChaptersLoadingSkeleton />}>
-        <ChaptersClient
+        <LessonClient
           params={resolvedParams}
-          chapters={data.chapters}
-          courseInfo={data.courseInfo}
+          chapterData={chapterData}
+          lessonList={lessonList}
         />
       </Suspense>
     );
-  } catch {
+  } catch (error) {
+    console.error("Error in ChaptersPage:", error);
     return (
-      <ChaptersClient
+      <LessonClient
         params={resolvedParams}
         error="Impossible de charger les chapitres"
       />
