@@ -107,7 +107,9 @@ export function ChaptersClient({
               transition={{ delay: index * 0.1 }}
             >
               <Link
-                href={`/${params.language}/${params.course}/${chapter.id}`}
+                href={`/${params.language}/${params.course}/${
+                  chapter.id
+                }/lesson-${index + 1}`}
                 className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-xl"
                 aria-label={`Accéder au chapitre ${index + 1} : ${
                   chapter.title
