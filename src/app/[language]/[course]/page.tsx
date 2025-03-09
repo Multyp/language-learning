@@ -101,5 +101,3 @@ export async function generateStaticParams() {
     { language: "japanese", course: "course-2" },
   ];
 }
-
-export const dynamic = "force-static";
