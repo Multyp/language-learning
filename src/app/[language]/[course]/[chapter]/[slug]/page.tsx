@@ -171,3 +171,5 @@ export default function LessonPage({
     </div>
   );
 }
+
+export const dynamic = "force-static";
