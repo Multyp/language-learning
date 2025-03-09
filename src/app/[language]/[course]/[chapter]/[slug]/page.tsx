@@ -1,6 +1,9 @@
 import { Suspense } from "react";
 import { LessonClient } from "./client";
 import { MDXRemoteSerializeResult } from "next-mdx-remote";
+import fs from "fs/promises";
+import path from "path";
+import { serialize } from "next-mdx-remote/serialize";
 
 interface LessonContent {
   content: MDXRemoteSerializeResult<unknown, unknown>;
@@ -41,49 +44,194 @@ interface PageParams {
   slug: string;
 }
 
-async function fetchLessonData(params: PageParams) {
-  try {
-    const response = await fetch(
-      `/api/${params.language}/${params.course}/${params.chapter}/${params.slug}`
-    );
+interface PageProps {
+  params: PageParams;
+}
 
-    if (!response.ok) throw new Error("Failed to fetch lesson");
-    return (await response.json()) as LessonContent;
-  } catch {
+// Server-side function to load lesson content
+async function getLessonData(params: PageParams): Promise<LessonContent> {
+  try {
+    const basePath = path.join(process.cwd(), "src/app/content");
+    const languagePath = path.join(basePath, params.language);
+    const coursePath = path.join(languagePath, params.course);
+    const chapterPath = path.join(coursePath, params.chapter);
+    const lessonPath = path.join(chapterPath, `${params.slug}.mdx`);
+
+    // Read lesson MDX content
+    const mdxContent = await fs.readFile(lessonPath, "utf-8");
+
+    // Read course descriptor
+    const courseDescriptorPath = path.join(coursePath, "descriptor.json");
+    const courseDescriptorRaw = await fs.readFile(
+      courseDescriptorPath,
+      "utf-8"
+    );
+    const courseInfo = JSON.parse(courseDescriptorRaw);
+
+    // Read chapter descriptor
+    const chapterDescriptorPath = path.join(chapterPath, "descriptor.json");
+    const chapterDescriptorRaw = await fs.readFile(
+      chapterDescriptorPath,
+      "utf-8"
+    );
+    const chapterInfo = JSON.parse(chapterDescriptorRaw);
+
+    // Extract frontmatter and serialize MDX content
+    // In a real app, you might want to parse frontmatter from the MDX file
+    // For this example, we'll use a simplified approach
+    const frontmatter = {
+      title: params.slug
+        .replace(/-/g, " ")
+        .replace(/\b\w/g, (l) => l.toUpperCase()),
+      description: "Lesson description",
+      order: parseInt(params.slug.replace("lesson-", "")),
+    };
+
+    const content = await serialize(mdxContent);
+
+    return {
+      content,
+      frontmatter,
+      courseInfo,
+      chapterInfo,
+    };
+  } catch (error) {
+    console.error("Error loading lesson data:", error);
     throw new Error("Le chargement de la leçon a échoué");
   }
 }
 
-async function fetchNavigationData(params: PageParams) {
+// Server-side function to determine navigation options
+async function getNavigationData(params: PageParams): Promise<Navigation> {
   try {
-    const response = await fetch(
-      `/api/${params.language}/${params.course}/${params.chapter}/${params.slug}/navigation`
+    const basePath = path.join(process.cwd(), "src/app/content");
+    const languagePath = path.join(basePath, params.language);
+    const coursePath = path.join(languagePath, params.course);
+    const chapterPath = path.join(coursePath, params.chapter);
+
+    // Get all lessons in current chapter
+    const files = await fs.readdir(chapterPath);
+    const lessonFiles = files
+      .filter((file) => file.endsWith(".mdx"))
+      .sort((a, b) => {
+        const aNum = parseInt(a.replace("lesson-", "").replace(".mdx", ""));
+        const bNum = parseInt(b.replace("lesson-", "").replace(".mdx", ""));
+        return aNum - bNum;
+      });
+
+    const currentIndex = lessonFiles.findIndex(
+      (file) => file === `${params.slug}.mdx`
     );
 
-    if (!response.ok) return null;
-    return (await response.json()) as Navigation;
-  } catch {
-    return null;
+    let previous = null;
+    let next = null;
+
+    // Previous lesson in same chapter
+    if (currentIndex > 0) {
+      const prevSlug = lessonFiles[currentIndex - 1].replace(".mdx", "");
+      previous = {
+        course: params.course,
+        chapter: params.chapter,
+        slug: prevSlug,
+        title: prevSlug
+          .replace(/-/g, " ")
+          .replace(/\b\w/g, (l) => l.toUpperCase()),
+      };
+    } else {
+      // Check if there's a previous chapter
+      const chapters = await fs.readdir(coursePath, { withFileTypes: true });
+      const chapterDirs = chapters
+        .filter((dir) => dir.isDirectory() && dir.name.startsWith("chapter-"))
+        .map((dir) => dir.name)
+        .sort();
+
+      const currentChapterIndex = chapterDirs.indexOf(params.chapter);
+
+      if (currentChapterIndex > 0) {
+        const prevChapter = chapterDirs[currentChapterIndex - 1];
+        const prevChapterPath = path.join(coursePath, prevChapter);
+        const prevChapterFiles = await fs.readdir(prevChapterPath);
+        const prevChapterLessons = prevChapterFiles
+          .filter((file) => file.endsWith(".mdx"))
+          .sort();
+
+        if (prevChapterLessons.length > 0) {
+          const prevSlug = prevChapterLessons[
+            prevChapterLessons.length - 1
+          ].replace(".mdx", "");
+          previous = {
+            course: params.course,
+            chapter: prevChapter,
+            slug: prevSlug,
+            title: prevSlug
+              .replace(/-/g, " ")
+              .replace(/\b\w/g, (l) => l.toUpperCase()),
+          };
+        }
+      }
+    }
+
+    // Next lesson in same chapter
+    if (currentIndex < lessonFiles.length - 1) {
+      const nextSlug = lessonFiles[currentIndex + 1].replace(".mdx", "");
+      next = {
+        course: params.course,
+        chapter: params.chapter,
+        slug: nextSlug,
+        title: nextSlug
+          .replace(/-/g, " ")
+          .replace(/\b\w/g, (l) => l.toUpperCase()),
+      };
+    } else {
+      // Check if there's a next chapter
+      const chapters = await fs.readdir(coursePath, { withFileTypes: true });
+      const chapterDirs = chapters
+        .filter((dir) => dir.isDirectory() && dir.name.startsWith("chapter-"))
+        .map((dir) => dir.name)
+        .sort();
+
+      const currentChapterIndex = chapterDirs.indexOf(params.chapter);
+
+      if (currentChapterIndex < chapterDirs.length - 1) {
+        const nextChapter = chapterDirs[currentChapterIndex + 1];
+        const nextChapterPath = path.join(coursePath, nextChapter);
+        const nextChapterFiles = await fs.readdir(nextChapterPath);
+        const nextChapterLessons = nextChapterFiles
+          .filter((file) => file.endsWith(".mdx"))
+          .sort();
+
+        if (nextChapterLessons.length > 0) {
+          const nextSlug = nextChapterLessons[0].replace(".mdx", "");
+          next = {
+            course: params.course,
+            chapter: nextChapter,
+            slug: nextSlug,
+            title: nextSlug
+              .replace(/-/g, " ")
+              .replace(/\b\w/g, (l) => l.toUpperCase()),
+          };
+        }
+      }
+    }
+
+    return { previous, next };
+  } catch (error) {
+    console.error("Error getting navigation data:", error);
+    return { previous: null, next: null };
   }
 }
 
-interface PageProps {
-  params: Promise<PageParams>;
-}
-
 export default async function LessonPage({ params }: PageProps) {
-  const resolvedParams = await params;
-
   try {
     const [content, navigation] = await Promise.all([
-      fetchLessonData(resolvedParams),
-      fetchNavigationData(resolvedParams),
+      getLessonData(params),
+      getNavigationData(params),
     ]);
 
     return (
       <Suspense fallback={<LessonLoadingSkeleton />}>
         <LessonClient
-          params={resolvedParams}
+          params={params}
           content={content}
           navigation={navigation}
         />
@@ -92,7 +240,7 @@ export default async function LessonPage({ params }: PageProps) {
   } catch {
     return (
       <LessonClient
-        params={resolvedParams}
+        params={params}
         error="Le chargement de la leçon a échoué"
       />
     );

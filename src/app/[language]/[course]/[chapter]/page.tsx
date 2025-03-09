@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import { ChaptersClient } from "./client";
 import { Skeleton } from "@/components/ui/skeleton";
+import fs from "fs/promises";
+import path from "path";
 
 interface PageParams {
   language: string;
@@ -8,30 +10,88 @@ interface PageParams {
 }
 
 interface PageProps {
-  params: Promise<PageParams>;
+  params: PageParams;
 }
 
-async function fetchChaptersData(params: PageParams) {
+interface Chapter {
+  id: string;
+  title: string;
+  description: string;
+  order: number;
+  lessonCount: number;
+}
+
+interface CourseInfo {
+  title: string;
+  description: string;
+}
+
+async function getChaptersData(params: PageParams): Promise<{
+  chapters: Chapter[];
+  courseInfo: CourseInfo;
+}> {
   try {
-    const response = await fetch(
-      `/api/${params.language}/${params.course}/chapters`
+    const coursePath = path.join(
+      process.cwd(),
+      "src/app/content",
+      params.language,
+      params.course
     );
-    if (!response.ok) throw new Error("Impossible de charger les chapitres");
-    return await response.json();
-  } catch {
+
+    const courseDescriptorPath = path.join(coursePath, "descriptor.json");
+    const courseDescriptorRaw = await fs.readFile(
+      courseDescriptorPath,
+      "utf-8"
+    );
+    const courseInfo: CourseInfo = JSON.parse(courseDescriptorRaw);
+
+    const items = await fs.readdir(coursePath, { withFileTypes: true });
+    const chapterDirs = items.filter(
+      (item) => item.isDirectory() && item.name.startsWith("chapter-")
+    );
+
+    const chapters: Chapter[] = await Promise.all(
+      chapterDirs.map(async (dir) => {
+        const chapterId = dir.name;
+        const chapterPath = path.join(coursePath, chapterId);
+
+        const descriptorPath = path.join(chapterPath, "descriptor.json");
+        const descriptorRaw = await fs.readFile(descriptorPath, "utf-8");
+        const descriptor = JSON.parse(descriptorRaw);
+
+        const chapterItems = await fs.readdir(chapterPath);
+        const lessonCount = chapterItems.filter((item) =>
+          item.endsWith(".mdx")
+        ).length;
+
+        return {
+          id: chapterId,
+          title: descriptor.title,
+          description: descriptor.description,
+          order:
+            descriptor.order || parseInt(chapterId.replace("chapter-", "")),
+          lessonCount,
+        };
+      })
+    );
+
+    chapters.sort((a, b) => a.order - b.order);
+
+    return { chapters, courseInfo };
+  } catch (error) {
+    console.error("Error reading chapter data:", error);
     throw new Error("Impossible de charger les chapitres");
   }
 }
 
 export default async function ChaptersPage({ params }: PageProps) {
-  const resolvedParams = await params;
-
   try {
-    const data = await fetchChaptersData(resolvedParams);
+    const data = await getChaptersData(params);
+
     return (
       <Suspense fallback={<ChaptersLoadingSkeleton />}>
         <ChaptersClient
-          params={resolvedParams}
+          params={params}
           chapters={data.chapters}
           courseInfo={data.courseInfo}
         />
@@ -40,7 +100,7 @@ export default async function ChaptersPage({ params }: PageProps) {
   } catch {
     return (
       <ChaptersClient
-        params={resolvedParams}
+        params={params}
         error="Impossible de charger les chapitres"
       />
     );
@@ -77,8 +137,7 @@ function ChaptersLoadingSkeleton() {
 
 export async function generateStaticParams() {
   return [
-    { language: "japanese", course: "course-1", chapter: "chapter-1" },
-    { language: "japanese", course: "course-2", chapter: "chapter-1" },
-    { language: "japanese", course: "course-2", chapter: "chapter-2" },
+    { language: "japanese", course: "course-1" },
+    { language: "japanese", course: "course-2" },
   ];
 }

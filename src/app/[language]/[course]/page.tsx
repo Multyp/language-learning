@@ -1,5 +1,7 @@
 import { Suspense } from "react";
 import { ChaptersClient } from "./client";
+import fs from "fs";
+import path from "path";
 
 interface Chapter {
   id: string;
@@ -19,36 +21,80 @@ interface PageParams {
   course: string;
 }
 
-async function fetchChaptersData(params: PageParams) {
+function getChaptersData(params: PageParams): {
+  chapters: Chapter[];
+  courseInfo: CourseInfo;
+} {
   try {
-    const response = await fetch(
-      `/api/${params.language}/${params.course}/chapters`
+    // Get course info from descriptor.json
+    const coursePath = path.join(
+      process.cwd(),
+      "src",
+      "app",
+      "content",
+      params.language,
+      params.course
     );
-    if (!response.ok) throw new Error("Impossible de charger les chapitres");
-    const data = await response.json();
+    const courseDescriptorPath = path.join(coursePath, "descriptor.json");
+    const courseInfo = JSON.parse(
+      fs.readFileSync(courseDescriptorPath, "utf8")
+    ) as CourseInfo;
+
+    // Get chapters by reading subdirectories
+    const chapterDirs = fs
+      .readdirSync(coursePath)
+      .filter(
+        (dir) =>
+          dir.startsWith("chapter-") &&
+          fs.statSync(path.join(coursePath, dir)).isDirectory()
+      );
+
+    const chapters = chapterDirs
+      .map((chapterDir) => {
+        const chapterPath = path.join(coursePath, chapterDir);
+        const descriptorPath = path.join(chapterPath, "descriptor.json");
+        const chapterData = JSON.parse(fs.readFileSync(descriptorPath, "utf8"));
+
+        // Count lessons by counting MDX files
+        const lessonFiles = fs
+          .readdirSync(chapterPath)
+          .filter((file) => file.endsWith(".mdx"));
+
+        return {
+          id: chapterDir,
+          title: chapterData.title,
+          description: chapterData.description,
+          order: chapterData.order || parseInt(chapterDir.split("-")[1], 10),
+          lessonCount: lessonFiles.length,
+        };
+      })
+      .sort((a, b) => a.order - b.order);
+
     return {
-      chapters: data.chapters as Chapter[],
-      courseInfo: data.courseInfo as CourseInfo,
+      chapters,
+      courseInfo,
     };
-  } catch {
+  } catch (error) {
+    console.error(
+      `Error loading chapters for ${params.language}/${params.course}:`,
+      error
+    );
     throw new Error("Le chargement des chapitres a échoué");
   }
 }
 
 interface PageProps {
-  params: Promise<PageParams>;
+  params: PageParams;
 }
 
-export default async function ChaptersPage({ params }: PageProps) {
-  const resolvedParams = await params;
-
+export default function ChaptersPage({ params }: PageProps) {
   try {
-    const data = await fetchChaptersData(resolvedParams);
+    const data = getChaptersData(params);
 
     return (
       <Suspense fallback={<ChaptersLoadingSkeleton />}>
         <ChaptersClient
-          params={resolvedParams}
+          params={params}
           chapters={data.chapters}
           courseInfo={data.courseInfo}
         />
@@ -57,7 +103,7 @@ export default async function ChaptersPage({ params }: PageProps) {
   } catch {
     return (
       <ChaptersClient
-        params={resolvedParams}
+        params={params}
         error="Impossible de charger les chapitres"
       />
     );

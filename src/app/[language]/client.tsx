@@ -1,7 +1,6 @@
-// File: components/CoursesPageClient.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { BookOpen, ChevronRight, GraduationCap, ArrowLeft } from "lucide-react";
@@ -20,46 +19,20 @@ interface Course {
 }
 
 export function CoursesPageClient({
-  params,
+  courses,
+  language,
 }: {
-  params: Promise<{ language: string }>;
+  courses: Course[];
+  language: string;
 }) {
-  const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [language, setLanguage] = useState<string>("");
+  const [error] = useState("");
 
   useEffect(() => {
-    const resolveParams = async () => {
-      try {
-        const resolvedParams = await params;
-        setLanguage(resolvedParams.language);
-      } catch {
-        setError("Le chargement des paramètres de la page a échoué");
-        setLoading(false);
-      }
-    };
-    resolveParams();
-  }, [params]);
-
-  useEffect(() => {
-    if (!language) return;
-
-    const fetchCourses = async () => {
-      try {
-        const response = await fetch(`/api/${language}/courses`);
-        if (!response.ok) throw new Error("Failed to fetch courses");
-        const data = await response.json();
-        setCourses(data);
-      } catch {
-        setError("Impossible de charger les cours");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCourses();
-  }, [language]);
+    // Short timeout to ensure hydration is complete
+    const timer = setTimeout(() => setLoading(false), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   if (loading) {
     return (
@@ -91,6 +64,20 @@ export function CoursesPageClient({
         <Alert variant="destructive" className="border-2 border-destructive">
           <AlertTitle className="font-bold">Erreur</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  if (courses.length === 0) {
+    return (
+      <div className="container mx-auto p-8">
+        <Alert className="border-2">
+          <AlertTitle className="font-bold">Aucun cours disponible</AlertTitle>
+          <AlertDescription>
+            Aucun cours n{"'"}est disponible pour le moment. Veuillez réessayer
+            plus tard.
+          </AlertDescription>
         </Alert>
       </div>
     );
