@@ -3,6 +3,7 @@ import { LessonClient } from "./client";
 import { serialize } from "next-mdx-remote/serialize";
 import fs from "fs/promises";
 import path from "path";
+import matter from "gray-matter";
 
 interface LessonContent {
   serializedContent: string; // Serialized content as string to pass to client
@@ -47,7 +48,6 @@ interface PageProps {
   params: Promise<PageParams>;
 }
 
-// Server-side function to load lesson content
 async function getLessonData(params: PageParams): Promise<LessonContent> {
   try {
     const basePath = path.join(process.cwd(), "src/app/content");
@@ -56,10 +56,10 @@ async function getLessonData(params: PageParams): Promise<LessonContent> {
     const chapterPath = path.join(coursePath, params.chapter);
     const lessonPath = path.join(chapterPath, `${params.slug}.mdx`);
 
-    // Read lesson MDX content
     const mdxContent = await fs.readFile(lessonPath, "utf-8");
 
-    // Read course descriptor
+    const { content, data } = matter(mdxContent);
+
     const courseDescriptorPath = path.join(coursePath, "descriptor.json");
     const courseDescriptorRaw = await fs.readFile(
       courseDescriptorPath,
@@ -67,7 +67,6 @@ async function getLessonData(params: PageParams): Promise<LessonContent> {
     );
     const courseInfo = JSON.parse(courseDescriptorRaw);
 
-    // Read chapter descriptor
     const chapterDescriptorPath = path.join(chapterPath, "descriptor.json");
     const chapterDescriptorRaw = await fs.readFile(
       chapterDescriptorPath,
@@ -75,18 +74,16 @@ async function getLessonData(params: PageParams): Promise<LessonContent> {
     );
     const chapterInfo = JSON.parse(chapterDescriptorRaw);
 
-    // Extract frontmatter and serialize MDX content
     const frontmatter = {
-      title: params.slug
-        .replace(/-/g, " ")
-        .replace(/\b\w/g, (l) => l.toUpperCase()),
-      description: "Lesson description",
-      order: parseInt(params.slug.replace("lesson-", "")),
+      title:
+        data.title ||
+        params.slug.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
+      description: data.description || "Lesson description",
+      order: data.order || parseInt(params.slug.replace("lesson-", "")),
+      ...data,
     };
 
-    // Serialize the MDX content
-    const mdxResult = await serialize(mdxContent);
-    // Convert the serialized content to a string to pass to the client
+    const mdxResult = await serialize(content);
     const serializedContent = JSON.stringify(mdxResult);
 
     return {
@@ -101,7 +98,6 @@ async function getLessonData(params: PageParams): Promise<LessonContent> {
   }
 }
 
-// Server-side function to determine navigation options
 async function getNavigationData(params: PageParams): Promise<Navigation> {
   try {
     const basePath = path.join(process.cwd(), "src/app/content");
@@ -109,7 +105,6 @@ async function getNavigationData(params: PageParams): Promise<Navigation> {
     const coursePath = path.join(languagePath, params.course);
     const chapterPath = path.join(coursePath, params.chapter);
 
-    // Get all lessons in current chapter
     const files = await fs.readdir(chapterPath);
     const lessonFiles = files
       .filter((file) => file.endsWith(".mdx"))
@@ -126,7 +121,6 @@ async function getNavigationData(params: PageParams): Promise<Navigation> {
     let previous = null;
     let next = null;
 
-    // Previous lesson in same chapter
     if (currentIndex > 0) {
       const prevSlug = lessonFiles[currentIndex - 1].replace(".mdx", "");
       previous = {
@@ -138,7 +132,6 @@ async function getNavigationData(params: PageParams): Promise<Navigation> {
           .replace(/\b\w/g, (l) => l.toUpperCase()),
       };
     } else {
-      // Check if there's a previous chapter
       const chapters = await fs.readdir(coursePath, { withFileTypes: true });
       const chapterDirs = chapters
         .filter((dir) => dir.isDirectory() && dir.name.startsWith("chapter-"))
@@ -171,7 +164,6 @@ async function getNavigationData(params: PageParams): Promise<Navigation> {
       }
     }
 
-    // Next lesson in same chapter
     if (currentIndex < lessonFiles.length - 1) {
       const nextSlug = lessonFiles[currentIndex + 1].replace(".mdx", "");
       next = {
@@ -183,7 +175,6 @@ async function getNavigationData(params: PageParams): Promise<Navigation> {
           .replace(/\b\w/g, (l) => l.toUpperCase()),
       };
     } else {
-      // Check if there's a next chapter
       const chapters = await fs.readdir(coursePath, { withFileTypes: true });
       const chapterDirs = chapters
         .filter((dir) => dir.isDirectory() && dir.name.startsWith("chapter-"))

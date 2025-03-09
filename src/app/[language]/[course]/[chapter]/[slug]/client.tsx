@@ -116,7 +116,6 @@ export function LessonClient({
         </nav>
         {/* Main content */}
         <article className="prose lg:prose-xl dark:prose-invert mx-auto bg-card rounded-xl p-8 shadow-lg">
-          <h1>{content.frontmatter.title}</h1>
           {mdxContent ? (
             <MDXRemote {...mdxContent} components={components} />
           ) : (
