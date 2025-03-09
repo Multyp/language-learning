@@ -29,7 +29,7 @@ export async function GET(
     return NextResponse.json(
       coursesInfo.sort((a, b) => (a.order || 0) - (b.order || 0))
     );
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Failed to fetch courses" },
       { status: 500 }

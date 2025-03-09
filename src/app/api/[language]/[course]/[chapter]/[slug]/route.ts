@@ -65,7 +65,7 @@ export async function GET(
       courseInfo,
       chapterInfo,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
   }
 }

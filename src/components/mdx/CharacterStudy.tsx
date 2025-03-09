@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import { Pause, Play, SkipBack, SkipForward, Volume2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
@@ -12,7 +13,6 @@ interface CharacterStudyProps {
 }
 
 const CharacterStudy = ({
-  character,
   sound,
   strokeOrder,
   mnemonic,
@@ -113,8 +113,13 @@ const CharacterStudy = ({
       <CardContent className="space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div className="flex flex-col items-center space-y-6">
-            <div className="text-8xl font-japanese">{character}</div>
-            <img src={strokeOrder} alt="Ordre des traits" className="h-40" />
+            <Image
+              src={strokeOrder}
+              alt="Ordre des traits"
+              height={160}
+              width={160}
+              className="h-40"
+            />
           </div>
 
           <div className="space-y-6">

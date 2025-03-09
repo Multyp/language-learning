@@ -4,16 +4,14 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
-  BookOpen,
   ChevronRight,
   ScrollText,
-  Loader2,
   ArrowLeft,
   GraduationCap,
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -49,7 +47,7 @@ export default function ChaptersPage({
       try {
         const resolved = await params;
         setResolvedParams(resolved);
-      } catch (err) {
+      } catch {
         setError("Le chargement des paramètres de la page a échoué");
         setLoading(false);
       }
@@ -70,7 +68,7 @@ export default function ChaptersPage({
         const data = await response.json();
         setChapters(data.chapters);
         setCourseInfo(data.courseInfo);
-      } catch (err) {
+      } catch {
         setError("Impossible de charger les chapitres");
       } finally {
         setLoading(false);

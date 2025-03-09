@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Timer, Check, X, Gamepad, Award, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -26,7 +26,6 @@ interface HiraganaRow {
 }
 
 const HiraganaGame = () => {
-  const [showGame, setShowGame] = useState(false);
   const [gameSettings, setGameSettings] = useState<HiraganaQuizSettings>({
     selectedHiragana: [],
     includeAccents: false,
@@ -46,7 +45,7 @@ const HiraganaGame = () => {
   const [isAnswered, setIsAnswered] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState("");
 
-  const getAllHiragana = () => {
+  const getAllHiragana = useCallback(() => {
     const all = [
       ...hiraganaData.basic.flatMap((row) =>
         row.chars.map((char) => char.hiragana)
@@ -62,9 +61,9 @@ const HiraganaGame = () => {
       ),
     ];
     return all;
-  };
+  }, []);
 
-  const generateQuestion = () => {
+  const generateQuestion = useCallback(() => {
     const availableHiragana =
       gameSettings.selectedHiragana.length > 0
         ? gameSettings.selectedHiragana
@@ -86,7 +85,11 @@ const HiraganaGame = () => {
     setTimer(gameSettings.timePerQuestion);
     setIsAnswered(false);
     setSelectedAnswer("");
-  };
+  }, [
+    gameSettings.selectedHiragana,
+    gameSettings.timePerQuestion,
+    getAllHiragana,
+  ]);
 
   const startGame = () => {
     setGameStarted(true);
@@ -96,30 +99,40 @@ const HiraganaGame = () => {
     generateQuestion();
   };
 
-  const handleAnswer = (answer: string) => {
-    if (isAnswered) return;
+  const handleAnswer = useCallback(
+    (answer: string) => {
+      if (isAnswered) return;
 
-    setIsAnswered(true);
-    setSelectedAnswer(answer);
+      setIsAnswered(true);
+      setSelectedAnswer(answer);
 
-    if (answer === currentHiragana) {
-      setScore((prev) => prev + 1);
-    }
-
-    if (timerInterval) {
-      clearInterval(timerInterval);
-    }
-
-    setTimeout(() => {
-      if (currentQuestion + 1 < gameSettings.questionCount) {
-        setCurrentQuestion((prev) => prev + 1);
-        generateQuestion();
-      } else {
-        setShowResult(true);
-        setGameStarted(false);
+      if (answer === currentHiragana) {
+        setScore((prev) => prev + 1);
       }
-    }, 1500);
-  };
+
+      if (timerInterval) {
+        clearInterval(timerInterval);
+      }
+
+      setTimeout(() => {
+        if (currentQuestion + 1 < gameSettings.questionCount) {
+          setCurrentQuestion((prev) => prev + 1);
+          generateQuestion();
+        } else {
+          setShowResult(true);
+          setGameStarted(false);
+        }
+      }, 1500);
+    },
+    [
+      isAnswered,
+      currentHiragana,
+      timerInterval,
+      currentQuestion,
+      gameSettings.questionCount,
+      generateQuestion,
+    ]
+  );
 
   useEffect(() => {
     if (gameStarted && !isAnswered) {
@@ -135,7 +148,7 @@ const HiraganaGame = () => {
       setTimerInterval(interval);
       return () => clearInterval(interval);
     }
-  }, [gameStarted, currentQuestion, isAnswered]);
+  }, [gameStarted, currentQuestion, isAnswered, handleAnswer]);
 
   const HiraganaTable = ({
     title,
@@ -217,7 +230,7 @@ const HiraganaGame = () => {
             <div className="space-x-4">
               <Button
                 variant="outline"
-                onClick={() => setShowGame(false)}
+                onClick={() => setShowResult(false)}
                 className="border-2"
               >
                 Quitter

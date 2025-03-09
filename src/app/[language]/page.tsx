@@ -33,7 +33,7 @@ export default function CoursesPage({
       try {
         const resolvedParams = await params;
         setLanguage(resolvedParams.language);
-      } catch (err) {
+      } catch {
         setError("Le chargement des paramètres de la page a échoué");
         setLoading(false);
       }
@@ -50,7 +50,7 @@ export default function CoursesPage({
         if (!response.ok) throw new Error("Failed to fetch courses");
         const data = await response.json();
         setCourses(data);
-      } catch (err) {
+      } catch {
         setError("Impossible de charger les cours");
       } finally {
         setLoading(false);

@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MDXRemote } from "next-mdx-remote";
+import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
 import { BookOpen, ArrowLeft, ArrowRight } from "lucide-react";
 import { components } from "@/components/mdx";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 interface LessonContent {
-  content: any;
+  content: MDXRemoteSerializeResult<unknown, unknown>;
   frontmatter: {
     title: string;
     description: string;
@@ -81,7 +81,7 @@ export default function LessonPage({
           const navData: Navigation = await navResponse.json();
           setNavigation(navData);
         }
-      } catch (err) {
+      } catch {
         setError("Le chargement de la leçon a échoué");
       } finally {
         setLoading(false);

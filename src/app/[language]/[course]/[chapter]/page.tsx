@@ -3,19 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import {
-  BookOpen,
-  ChevronRight,
-  Loader2,
-  ArrowLeft,
-  BookOpenCheck,
-} from "lucide-react";
+import { ChevronRight, ArrowLeft, BookOpenCheck } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { language } from "gray-matter";
 
 interface Lesson {
   id: string;
@@ -49,7 +42,7 @@ export default function ChapterPage({
       try {
         const resolved = await params;
         setResolvedParams(resolved);
-      } catch (err) {
+      } catch {
         setError("Le chargement des paramètres de la page a échoué");
         setLoading(false);
       }
@@ -69,7 +62,7 @@ export default function ChapterPage({
         const data = await response.json();
         setLessons(data.lessons);
         setChapterInfo(data.chapterInfo);
-      } catch (err) {
+      } catch {
         setError("Le chargement des leçons a échoué");
       } finally {
         setLoading(false);

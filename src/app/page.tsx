@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { ChevronRight, BookOpenCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";

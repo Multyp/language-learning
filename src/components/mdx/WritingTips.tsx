@@ -7,7 +7,7 @@ const WritingTips = ({ tips }: { tips: string[] }) => {
       <CardHeader className="flex flex-row items-center gap-2">
         <BookOpen className="w-6 h-6 text-green-500" />
         <CardTitle className="text-xl font-bold text-green-900">
-          Conseils d'écriture
+          Conseils d{"'"}écriture
         </CardTitle>
       </CardHeader>
       <CardContent>

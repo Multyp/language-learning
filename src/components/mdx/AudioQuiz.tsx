@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Pause, Play, SkipBack, SkipForward, Volume2 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";

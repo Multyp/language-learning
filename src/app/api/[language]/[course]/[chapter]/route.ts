@@ -47,7 +47,7 @@ export async function GET(
       courseInfo,
       chapters: chapters.sort((a, b) => (a.order || 0) - (b.order || 0)),
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Failed to fetch chapters" },
       { status: 500 }

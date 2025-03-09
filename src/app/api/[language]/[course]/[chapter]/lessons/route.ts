@@ -1,4 +1,3 @@
-// app/api/[language]/[course]/[chapter]/lessons/route.ts
 import { NextResponse } from "next/server";
 import { readFile, readdir, stat } from "fs/promises";
 import path from "path";
@@ -46,7 +45,6 @@ export async function GET(
         }
       } catch (fsError) {
         console.error(`Error accessing file at ${lessonPath}:`, fsError);
-        // Handle the error appropriately, e.g., skip this entry or return an error response
       }
     }
 
@@ -54,7 +52,7 @@ export async function GET(
       chapterInfo,
       lessons: lessons.sort((a, b) => (a.order || 0) - (b.order || 0)),
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Failed to fetch lessons" },
       { status: 500 }

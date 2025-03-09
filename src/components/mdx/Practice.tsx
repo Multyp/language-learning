@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckCircle2, Info, RefreshCcw } from "lucide-react";
+import { CheckCircle2, RefreshCcw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface TrueFalseProps {
