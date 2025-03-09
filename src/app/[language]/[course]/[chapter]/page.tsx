@@ -194,3 +194,5 @@ export default function ChapterPage({
     </div>
   );
 }
+
+export const dynamic = "force-static";
