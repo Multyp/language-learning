@@ -8,6 +8,7 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: "/language-learning",
     display: "standalone",
     background_color: "#fff",
+
     theme_color: "#fff",
     icons: [
       {

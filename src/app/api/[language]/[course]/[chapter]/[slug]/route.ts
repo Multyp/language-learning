@@ -115,5 +115,3 @@ export async function generateStaticParams() {
 
   return paths;
 }
-
-export const dynamic = "force-static";
