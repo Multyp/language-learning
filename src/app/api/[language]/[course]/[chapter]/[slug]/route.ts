@@ -69,3 +69,5 @@ export async function GET(
     return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
   }
 }
+
+export const dynamic = "force-static";
